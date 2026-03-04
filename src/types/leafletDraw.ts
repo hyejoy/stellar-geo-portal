@@ -6,15 +6,15 @@ export interface DrawOptions {
   marker?: boolean;
   circlemarker?: boolean;
 }
+export type RectangleBbox = {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+};
 
-export type Bbox =
-  | {
-      north: number;
-      south: number;
-      east: number;
-      west: number;
-    }
-  | {
-      lat: number;
-      lng: number;
-    }[];
+export type PolygonBbox = {
+  lat: number;
+  lng: number;
+}[];
+export type Bbox = RectangleBbox | PolygonBbox;
