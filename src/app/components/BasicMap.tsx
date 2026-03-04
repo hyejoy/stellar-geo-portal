@@ -142,6 +142,19 @@ export default function BasicMap() {
     changeAreaPrice(formatedPrice);
   }, [landArea]);
 
+  // 선택한 지역(센터 위치)이 바뀔 때마다 이전에 그렸던 bbox와 도형 제거
+  useEffect(() => {
+    // bbox 초기화
+    changeBbox(null);
+    changeLandArea(0);
+
+    // 지도 상에 그려진 레이어 제거
+    const featureGroup = featureGroupRef.current;
+    if (featureGroup) {
+      featureGroup.clearLayers();
+    }
+  }, [position, changeBbox, changeLandArea]);
+
   return (
     <div className="relative h-full w-full">
       <MapContainer
