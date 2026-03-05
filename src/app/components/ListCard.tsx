@@ -35,14 +35,14 @@ export default function ListCard({
       <div className="grid grid-cols-1">
         <div className="relative h-22.5 w-15 overflow-hidden rounded-2xl">
           <Image
-            alt="yeosu"
+            alt={keyName}
             src={`/industrialComplex/${keyName}.png`}
             fill
             className="object-center"
           />
         </div>
       </div>
-      <div className="ml-2 flex-1 bg-gray-500 p-4">
+      <div className="ml-2 flex-1 rounded-md bg-gray-500 p-4">
         <div className="flex flex-col gap-1.5">
           <div className="flex justify-between">
             <p className="text-xl font-bold">{title}</p>

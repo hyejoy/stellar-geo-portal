@@ -1,16 +1,80 @@
 'use client';
 
-import { useAreaPrice, useLandArea, useSelectedArea } from '@/src/app/store/analysisStore';
+import {
+  useAnalysisActions,
+  useAreaPrice,
+  useLandArea,
+  useSelectedArea,
+  useSelectedBbox,
+  useSelectedYears,
+} from '@/src/app/store/analysisStore';
 import { useCloseDialog, useIsModalOpen } from '@/src/app/store/modalStore';
+import { useState } from 'react';
+import LoadingSpinner from '@/src/app/components/LoadingSpinner';
+import { useRouter } from 'next/navigation';
+import { AREAS } from '@/src/constants/areas';
 
 export default function OrderModal() {
+  const router = useRouter();
   /** analysis zustand */
+  const area = useSelectedArea();
+  const bbox = useSelectedBbox();
   const selectedArea = useSelectedArea();
-  const ladnArea = useLandArea();
+  const landArea = useLandArea();
   const price = useAreaPrice();
+  const { selectedStartYear, selectedEndYear } = useSelectedYears();
   /** modal zustand */
   const isOpen = useIsModalOpen();
   const onClose = useCloseDialog();
+  const [isLoading, setIsLoading] = useState(false);
+  const { setAnalysisOrder } = useAnalysisActions();
+
+  const handleOrder = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/analysis/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bbox,
+          landArea,
+          startYear: selectedStartYear ?? new Date().getFullYear() - 1,
+          endYear: selectedEndYear ?? new Date().getFullYear(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        window.alert(data.error ?? '주문 요청에 실패했습니다.');
+        return;
+      }
+      setAnalysisOrder({
+        area,
+        bbox,
+        landArea,
+        price,
+        startYear: selectedStartYear ?? new Date().getFullYear() - 1,
+        endYear: selectedEndYear ?? new Date().getFullYear(),
+        orderedAt: new Date().toISOString(),
+      });
+
+      // 2초 후 confirm 표시
+      setTimeout(() => {
+        setIsLoading(false);
+        const goToResult = window.confirm(
+          '주문이 완료되었습니다. 분석 결과 페이지로 이동 하시겠습니까?'
+        );
+
+        if (goToResult) {
+          onClose();
+          router.push(`/analysis/result/${data.orderId}`);
+        }
+      }, 2000);
+    } catch (err) {
+      window.alert('주문 요청 중 오류가 발생했습니다.');
+    }
+  };
   if (!isOpen) return null;
 
   return (
@@ -37,12 +101,12 @@ export default function OrderModal() {
           <div className="space-y-2 rounded-lg bg-white/5 p-4">
             <div className="flex justify-between text-sm">
               <span className="text-white/60">선택 지역</span>
-              <span>{selectedArea}</span>
+              <span>{AREAS[selectedArea].name}</span>
             </div>
 
             <div className="flex justify-between text-sm">
               <span className="text-white/60">면적</span>
-              <span>{ladnArea} km²</span>
+              <span>{landArea} km²</span>
             </div>
 
             <div className="flex justify-between text-sm">
@@ -64,10 +128,18 @@ export default function OrderModal() {
           </button>
 
           <button
-            onClick={onClose}
-            className="rounded-lg bg-yellow-500 px-5 py-2 font-semibold text-black hover:bg-yellow-600"
+            onClick={handleOrder}
+            disabled={isLoading}
+            className="flex items-center justify-center gap-2 rounded-lg bg-yellow-500 px-5 py-2 font-semibold text-black hover:bg-yellow-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            주문하기
+            {isLoading ? (
+              <>
+                <LoadingSpinner size="sm" />
+                <span>주문 처리 중...</span>
+              </>
+            ) : (
+              '주문하기'
+            )}
           </button>
         </div>
       </div>

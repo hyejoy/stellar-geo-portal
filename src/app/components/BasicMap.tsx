@@ -1,33 +1,33 @@
 'use client';
-import AnalysisPanel from '@/src/app/components/AnalysisPanel';
 import BottomBar from '@/src/app/components/BottomBar';
 import CustomDrawToolbar from '@/src/app/components/CustomDrawToolbar';
+import MapController from '@/src/app/components/MapController';
+import MapHeaderPanel from '@/src/app/components/MapHeaderPanel';
+import TopLayer from '@/src/app/components/TopLayer';
 import osm from '@/src/app/leaftlet/osmProvider';
-import { DrawOptions, PolygonBbox } from '@/src/types/leafletDraw';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { FeatureGroup, MapContainer, TileLayer, useMap } from 'react-leaflet';
-// leaflet-draw css
 import {
   useAnalysisActions,
+  useAnalysisType,
   useAreaPrice,
   useLandArea,
   useSelectedBbox,
   useSelectedPosition,
+  useSelectedYears,
 } from '@/src/app/store/analysisStore';
-import 'leaflet-draw';
-import 'leaflet-draw/dist/leaflet.draw.css';
-import { EditControl } from 'react-leaflet-draw';
-import MapController from '@/src/app/components/MapController';
+import { DrawOptions } from '@/src/types/leafletDraw';
+import { formatCurrency } from '@/src/utils/format';
 import {
   calculateAnalysisPrice,
   calculatePolygonAreaKm2,
   calculateRaectangleAreaKm2,
 } from '@/src/utils/geo';
-import { formatCurrency } from '@/src/utils/format';
-import TopLayer from '@/src/app/components/TopLayer';
-import MapHeaderPanel from '@/src/app/components/MapHeaderPanel';
+import L from 'leaflet';
+import 'leaflet-draw';
+import 'leaflet-draw/dist/leaflet.draw.css';
+import 'leaflet/dist/leaflet.css';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { FeatureGroup, MapContainer, TileLayer } from 'react-leaflet';
+import { EditControl } from 'react-leaflet-draw';
 
 const drawOptions: DrawOptions = {
   rectangle: false,
@@ -41,41 +41,42 @@ const drawOptions: DrawOptions = {
 const ZOOM_LEVEL = 14;
 
 export default function BasicMap() {
+  /** analysis zustand */
   const position = useSelectedPosition();
   const bbox = useSelectedBbox();
   const landArea = useLandArea();
-  const areaPrice = useAreaPrice();
+  const analysisType = useAnalysisType();
+  const { selectedStartYear, selectedEndYear } = useSelectedYears();
   const { changeBbox, changeLandArea, changeAreaPrice } = useAnalysisActions();
+
+  // const [analysisImage, setAnalysisImage] = useState<string | null>(null);
   const handleRefreshBbox = () => {
     changeBbox(null);
   };
 
-  const fetchNdvi = async (bbox: any) => {
+  const fetchAnalysis = async (bboxPayload: unknown) => {
     try {
-      const res = await fetch('/api/ndvi', {
-        // 앞에 '/'가 있는지, 오타는 없는지 확인
+      const res = await fetch('/api/analysis', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ bbox }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bbox: bboxPayload,
+          analysisType,
+          startYear: selectedStartYear ?? new Date().getFullYear() - 1,
+          endYear: selectedEndYear ?? new Date().getFullYear(),
+        }),
       });
-
-      if (res.status === 404) {
-        console.error('API 경로를 찾을 수 없습니다.');
-        return;
-      }
-
+      if (res.status === 404) return;
       const data = await res.json();
-      console.log('NDVI API Response:', data);
+      // setAnalysisImage(data.image ?? null);
     } catch (err) {
-      console.error('NDVI fetch error:', err);
+      console.error('Analysis fetch error:', err);
     }
   };
 
-  const mapRef = useRef(null);
+  const mapRef = useRef<L.Map | null>(null);
   const featureGroupRef = useRef<L.FeatureGroup>(null);
-
+  const analysisOverlayRef = useRef<L.ImageOverlay | null>(null);
   const _create = useCallback(
     (e: any) => {
       // 여기서 e는 L.DrawEvents.Created 역할입니다.
@@ -102,7 +103,7 @@ export default function BasicMap() {
         };
 
         changeBbox(bboxData);
-        fetchNdvi(bboxData);
+        fetchAnalysis(bboxData);
         const area = calculateRaectangleAreaKm2(bboxData);
         changeLandArea(area);
         console.log('BBOX:', bboxData);
@@ -126,8 +127,8 @@ export default function BasicMap() {
         const area = calculatePolygonAreaKm2(flatLatLngs);
         changeLandArea(area);
 
-        // 3. 분석 API 호출 (필요 시)
-        fetchNdvi(flatLatLngs);
+        // 3. 분석 API 호출
+        fetchAnalysis(flatLatLngs);
 
         console.log('Polygon Area (km²):', area);
         console.log('Polygon Coordinates:', flatLatLngs);
@@ -155,18 +156,44 @@ export default function BasicMap() {
     }
   }, [position, changeBbox, changeLandArea]);
 
+  // useEffect(() => {
+  //   if (!analysisImage || !bbox || !mapRef.current) return;
+  //   if (Array.isArray(bbox)) return;
+
+  //   const map = mapRef.current;
+  //   const bounds: L.LatLngBoundsLiteral = [
+  //     [bbox.south, bbox.west],
+  //     [bbox.north, bbox.east],
+  //   ];
+
+  //   if (analysisOverlayRef.current) {
+  //     map.removeLayer(analysisOverlayRef.current);
+  //     analysisOverlayRef.current = null;
+  //   }
+  //   const overlay = L.imageOverlay(`data:image/png;base64,${analysisImage}`, bounds).addTo(map);
+  //   analysisOverlayRef.current = overlay;
+
+  //   return () => {
+  //     if (analysisOverlayRef.current && map.hasLayer(analysisOverlayRef.current)) {
+  //       map.removeLayer(analysisOverlayRef.current);
+  //       analysisOverlayRef.current = null;
+  //     }
+  //   };
+  // }, [analysisImage, bbox]);
+
   return (
     <div className="relative h-full w-full">
       <MapContainer
         center={position}
         zoom={ZOOM_LEVEL}
-        ref={mapRef}
         className="h-full w-full"
         zoomControl={false}
-        minZoom={ZOOM_LEVEL}
-        dragging={false}
-        scrollWheelZoom={false}
+        dragging={true}
+        scrollWheelZoom={true}
         doubleClickZoom={false}
+        ref={(map) => {
+          if (map) mapRef.current = map;
+        }}
       >
         <MapController />
         <TileLayer className="z-0" url={osm.loadtier.url} />
@@ -195,7 +222,7 @@ export default function BasicMap() {
 
       {/* 선택한 지역 년도 표시 */}
       <div className="absolute top-0 right-0 left-0 z-[1000]">
-        <MapHeaderPanel startYear={2025} endYear={2026} />
+        <MapHeaderPanel />
       </div>
 
       {/* <LayerPanel /> */}

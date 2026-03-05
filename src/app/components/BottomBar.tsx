@@ -1,28 +1,38 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { useAreaPrice, useLandArea, useSelectedBbox } from '@/src/app/store/analysisStore';
 import { useIsModalOpen, useOpenDialog } from '@/src/app/store/modalStore';
-import { useAreaPrice, useLandArea, useSelectedBbox } from '../store/analysisStore';
 
 export default function BottomBar() {
-  const isModalOpen = useIsModalOpen();
+  const router = useRouter();
   const openModal = useOpenDialog();
   const bbox = useSelectedBbox();
   const landArea = useLandArea();
   const price = useAreaPrice();
 
   return (
-    <div className="absolute bottom-23 left-1/2 z-[1000] w-1/2 -translate-x-1/2 rounded-xl border border-neutral-700 bg-neutral-900 p-5 shadow-2xl">
-      {/* 내용물도 가운데 정렬하고 싶다면 text-center 추가 */}
-      <div className="flex justify-between">
-        <div className="flex items-center">
-          <p>선택한 지역: </p> <span className="font-bold text-amber-300">{landArea}km²</span>
-          <span className="px-3">|</span>
-          <p>예상 가격: </p> <span className="font-bold text-amber-300">{price}</span>
+    <div className="absolute bottom-50 left-1/2 z-[1100] w-[90%] max-w-2xl -translate-x-1/2 rounded-xl border border-white/10 bg-[#1b1f2a] p-4 shadow-2xl">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-white/90">
+          <span>선택 지역</span>
+          <span className="font-semibold text-amber-400">{landArea} km²</span>
+          <span className="text-white/40">|</span>
+          <span>예상 가격</span>
+          <span className="font-semibold text-amber-400">₩ {price}</span>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          {/* <button
+            type="button"
+            onClick={() => router.push('/analysis/result')}
+            className="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white hover:bg-white/10"
+          >
+            분석 결과 보기
+          </button> */}
           <button
+            type="button"
             onClick={openModal}
-            className="cursor-pointer rounded-b-sm bg-amber-400 px-4 py-2 font-bold text-gray-700"
+            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-black hover:bg-amber-400"
           >
             분석 요청
           </button>

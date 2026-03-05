@@ -8,6 +8,7 @@ import { AREA_ARRAY, AREAS } from '@/src/constants/areas';
 import { AreaKey } from '@/src/types/area';
 import { ChangeEvent, useMemo } from 'react';
 import ListCard from '../../components/ListCard';
+import SelectBox from '@/src/app/components/ui/SelectBox';
 
 export default function LeftPanel() {
   /** zustand */
@@ -20,18 +21,24 @@ export default function LeftPanel() {
   const handleAread = (e: ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
     changeArea(e.target.value as AreaKey);
   };
+  const areaOptions = Object.entries(AREAS).map(([key, v]) => ({
+    value: key,
+    label: v.name,
+  }));
   return (
     <>
       <div className="w-107.5 space-y-4 border-r p-4">
         <h2 className="text-xl font-bold">분석할 산업단지를 선택하세요.</h2>
 
-        <select className="w-full border p-2" value={area} onChange={handleAread}>
-          {Object.entries(AREAS).map(([key, v]) => (
-            <option key={key} value={key}>
-              {v.name}
-            </option>
-          ))}
-        </select>
+        <SelectBox
+          value={area}
+          placeholder="산업단지 선택..."
+          options={Object.entries(AREAS).map(([key, v]) => ({
+            value: key,
+            label: v.name,
+          }))}
+          onChange={handleAread}
+        />
 
         <div className="flex w-full flex-col rounded-t-2xl rounded-b-2xl bg-gray-600">
           {AREA_ARRAY.map((item) => (

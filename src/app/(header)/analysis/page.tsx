@@ -1,7 +1,6 @@
 'use client';
 import LeftPanel from '@/src/app/(header)/analysis/leftPanel';
 import OrderModal from '@/src/app/components/OrderModal';
-import AnalysisModal from '@/src/app/components/ui/AnalysisModal';
 import { useCloseDialog, useIsModalOpen } from '@/src/app/store/modalStore';
 import { formatCurrency } from '@/src/utils/format';
 import { calculateAnalysisPrice } from '@/src/utils/geo';

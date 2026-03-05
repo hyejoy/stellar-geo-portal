@@ -1,0 +1,7 @@
+---
+alwaysApply: true
+---
+
+- 모든api는 restful 원칙을 따릅니다.
+- 에러 처리는  try-catch로 구현합니다.
+- 응답은 json형식으로 변환합니다.

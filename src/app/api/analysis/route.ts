@@ -4,6 +4,8 @@ const BASE_URL = process.env.SENTINEL_BASE_URL;
 const CLIENT_ID = process.env.SENTINEL_CLIENT_ID;
 const CLIENT_SECRET = process.env.SENTINEL_CLIENT_SECRET;
 
+type AnalysisType = 'ndvi' | 'sar';
+
 function normalizeBbox(bbox: unknown): [number, number, number, number] | null {
   if (!bbox) return null;
   if (
@@ -25,18 +27,72 @@ function normalizeBbox(bbox: unknown): [number, number, number, number] | null {
   return null;
 }
 
+function getSatelliteAndEvalscript(analysisType: AnalysisType): {
+  satellite: string;
+  evalscript: string;
+} {
+  if (analysisType === 'ndvi') {
+    return {
+      satellite: 'sentinel-2-l2a',
+      evalscript: `
+          //VERSION=3
+          function setup() {
+            return {
+              input: ["B04", "B08"],
+              output: { bands: 3 }
+            };
+          }
+
+          function evaluatePixel(sample) {
+            let ndvi = (sample.B08 - sample.B04) /
+                      (sample.B08 + sample.B04);
+
+            if (ndvi < 0) return [0.5, 0.5, 0.5];
+            if (ndvi < 0.2) return [0.9, 0.7, 0.1];
+            if (ndvi < 0.4) return [0.6, 0.8, 0.2];
+            if (ndvi < 0.6) return [0.3, 0.7, 0.2];
+            return [0, 0.5, 0];
+          }
+          `,
+    };
+  }
+  // sar
+  return {
+    satellite: 'sentinel-1-grd',
+    evalscript: `
+      //VERSION=3
+      function setup() {
+        return {
+          input: ["VV"],
+          output: { bands: 1 }
+        };
+      }
+
+      function evaluatePixel(sample) {
+        return [sample.VV];
+      }
+      `,
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { bbox, selectedStartYear, selectedEndYear } = await req.json();
+    const { bbox, analysisType = 'sar', startYear, endYear } = await req.json();
 
     const bboxArr = normalizeBbox(bbox);
     if (!bboxArr) {
       return NextResponse.json({ error: 'bbox required (rectangle or polygon)' }, { status: 400 });
     }
 
+    const type: AnalysisType = analysisType === 'sar' ? 'sar' : 'ndvi';
+    const { satellite, evalscript } = getSatelliteAndEvalscript(type);
+
+    const currentYear = new Date().getFullYear();
+    const fromYear = startYear ?? currentYear - 1;
+    const toYear = endYear ?? currentYear;
+
     const [west, south, east, north] = bboxArr;
 
-    // 1. OAuth 토큰 요청
     const tokenRes = await fetch(`${BASE_URL}/oauth/token`, {
       method: 'POST',
       headers: {
@@ -54,11 +110,10 @@ export async function POST(req: NextRequest) {
 
     if (!accessToken) {
       console.error('Sentinel OAuth failed:', tokenData);
-      return NextResponse.json({ error: 'NDVI auth failed' }, { status: 502 });
+      return NextResponse.json({ error: 'Analysis auth failed' }, { status: 502 });
     }
 
-    // 2. NDVI 요청 (Process API 스펙: output + 3-band PNG)
-    const ndviRes = await fetch(`${BASE_URL}/api/v1/process`, {
+    const processRes = await fetch(`${BASE_URL}/api/v1/process`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -71,18 +126,11 @@ export async function POST(req: NextRequest) {
           },
           data: [
             {
-              type: 'sentinel-2-l2a',
+              type: satellite,
               dataFilter: {
                 timeRange: {
-                  from: `${selectedStartYear}-01-01T00:00:00Z`,
-                  to: `${selectedEndYear}-12-31T23:59:59Z`,
-                  ...(selectedStartYear === selectedEndYear
-                    ? {
-                        // 같은 해 선택 시: 1월 1일 ~ 12월 31일
-                        from: `${selectedStartYear}-01-01T00:00:00Z`,
-                        to: `${selectedEndYear}-12-31T23:59:59Z`,
-                      }
-                    : {}),
+                  from: `${fromYear}-01-01T00:00:00Z`,
+                  to: `${toYear}-12-31T23:59:59Z`,
                 },
               },
             },
@@ -100,44 +148,28 @@ export async function POST(req: NextRequest) {
             },
           ],
         },
-        evalscript: `
-                //VERSION=3
-                function setup() {
-                  return {
-                    input: ["B04", "B08"],
-                    output: { bands: 3 }
-                  };
-                }
-
-                function evaluatePixel(sample) {
-                  let ndvi = (sample.B08 - sample.B04) /
-                            (sample.B08 + sample.B04);
-
-                  if (ndvi < 0) return [0.5,0.5,0.5];
-                  if (ndvi < 0.2) return [0.9,0.7,0.1];
-                  if (ndvi < 0.4) return [0.6,0.8,0.2];
-                  if (ndvi < 0.6) return [0.3,0.7,0.2];
-                  return [0,0.5,0];
-                }
-              `,
+        evalscript,
       }),
     });
 
-    if (!ndviRes.ok) {
-      const errText = await ndviRes.text();
-      console.error('Sentinel Process API error:', ndviRes.status, errText);
-      return NextResponse.json({ error: 'NDVI process failed', detail: errText }, { status: 502 });
+    if (!processRes.ok) {
+      const errText = await processRes.text();
+      console.error('Sentinel Process API error:', processRes.status, errText);
+      return NextResponse.json(
+        { error: 'Analysis process failed', detail: errText },
+        { status: 502 }
+      );
     }
 
-    const ndviData = await ndviRes.arrayBuffer();
-    const buffer = Buffer.from(ndviData);
-    const base64 = buffer.toString('base64');
+    const imageBuffer = await processRes.arrayBuffer();
+    const base64 = Buffer.from(imageBuffer).toString('base64');
 
     return NextResponse.json({
       image: base64,
+      analysisType: type,
     });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: 'NDVI fetch failed' }, { status: 500 });
+    return NextResponse.json({ error: 'Analysis fetch failed' }, { status: 500 });
   }
 }
