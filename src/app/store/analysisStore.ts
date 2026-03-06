@@ -2,6 +2,7 @@ import { AREAS } from '@/src/constants/areas';
 import { AnalysisOrder } from '@/src/types/analysis';
 import { AreaKey } from '@/src/types/area';
 import { Bbox } from '@/src/types/leafletDraw';
+import { TrendChart } from '@/src/types/NDVI';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
@@ -20,6 +21,7 @@ interface AnalysisState {
   selectedEndYear: number | null;
   analysisType: AnalysisType;
   satellite: string;
+  resultTrendChart: TrendChart;
   actions: {
     changeArea: (area: AreaKey) => void;
     changeBbox: (bbox: Bbox) => void;
@@ -29,6 +31,8 @@ interface AnalysisState {
     changeSelectedEndYear: (year: number | null) => void;
     setAnalysisOrder: (order: AnalysisOrder) => void;
     changeAnalysisType: (type: AnalysisType) => void;
+    resetLandAreaAndPrice: () => void;
+    setResultTrendChart: (trendChart: TrendChart) => void;
   };
 }
 
@@ -40,10 +44,11 @@ export const useAnalysisStore = create(
     position: AREAS['pyeongtaek'].center,
     landArea: 0,
     price: '',
-    selectedStartYear: currentYear - 8,
+    selectedStartYear: currentYear - 4,
     selectedEndYear: currentYear,
     analysisType: 'sar',
     satellite: 'sentinel-1-grd',
+    resultTrendChart: [],
     actions: {
       changeArea: (area: AreaKey) => set({ selectedArea: area }),
       changeBbox: (bbox: Bbox) => set({ selectedBbox: bbox }),
@@ -57,6 +62,15 @@ export const useAnalysisStore = create(
           analysisType: type,
           satellite: type === 'ndvi' ? 'sentinel-2-l2a' : 'sentinel-1-grd',
         }),
+      resetLandAreaAndPrice: () =>
+        set({
+          landArea: 0,
+          price: '',
+        }),
+      setResultTrendChart: (trandChart: TrendChart) =>
+        set({
+          resultTrendChart: trandChart,
+        }),
     },
   }))
 );
@@ -64,7 +78,7 @@ export const useAnalysisStore = create(
 useAnalysisStore.subscribe(
   (store) => store.selectedArea,
   (newArea, prevArea) => {
-    console.log(newArea);
+    console.log(',.', newArea);
     console.log(prevArea);
     if (newArea === prevArea) return;
     useAnalysisStore.setState({
@@ -120,6 +134,11 @@ export const useAnalysisType = () => {
 export const useAnalysisOrder = () => {
   const analysisOrder = useAnalysisStore((state) => state.analysisOrder);
   return analysisOrder;
+};
+
+export const useNDVITrendChart = () => {
+  const chart = useAnalysisStore((state) => state.resultTrendChart);
+  return chart;
 };
 
 export const useAnalysisActions = () => {
