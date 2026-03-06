@@ -68,9 +68,9 @@ export default function OrderModal() {
 
         if (goToResult) {
           onClose();
-          router.push(`/analysis/result/${data.orderId}`);
+          router.push(`/result/${data.orderId}`);
         }
-      }, 2000);
+      }, 600);
     } catch (err) {
       window.alert('주문 요청 중 오류가 발생했습니다.');
     }
