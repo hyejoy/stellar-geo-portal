@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useSelectedPosition } from "@/src/app/store/analysisStore";
-import { useEffect } from "react";
-import { useMap } from "react-leaflet";
+import { useSelectedPosition } from '@/src/app/store/analysisStore';
+import { useEffect } from 'react';
+import { useMap } from 'react-leaflet';
 
 export default function MapController() {
   const map = useMap();

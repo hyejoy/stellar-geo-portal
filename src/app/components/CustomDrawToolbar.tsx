@@ -5,7 +5,7 @@ import L from 'leaflet';
 import 'leaflet-draw';
 import { useState } from 'react';
 import clsx from 'clsx';
-import { useSelectedBbox } from '@/src/app/store/analysisStore';
+import { useAnalysisActions, useSelectedBbox } from '@/src/app/store/analysisStore';
 
 interface Props {
   featureGroupRef: React.RefObject<L.FeatureGroup>;
@@ -15,6 +15,7 @@ type DrawMode = 'rectangle' | 'polygon' | null;
 
 export default function CustomDrawToolbar({ featureGroupRef, onChangeBbox }: Props) {
   const [mode, setMode] = useState<DrawMode>(null);
+  const { resetLandAreaAndPrice } = useAnalysisActions();
   const bbox = useSelectedBbox();
 
   const map = useMap();
@@ -35,6 +36,7 @@ export default function CustomDrawToolbar({ featureGroupRef, onChangeBbox }: Pro
 
   const clearLayers = () => {
     setMode(null);
+    resetLandAreaAndPrice();
     onChangeBbox();
     featureGroupRef.current?.clearLayers();
   };

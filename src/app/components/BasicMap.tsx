@@ -14,7 +14,7 @@ import {
   useSelectedPosition,
   useSelectedYears,
 } from '@/src/app/store/analysisStore';
-import { DrawOptions } from '@/src/types/leafletDraw';
+import { DrawOptions, PolygonBbox } from '@/src/types/leafletDraw';
 import { formatCurrency } from '@/src/utils/format';
 import {
   calculateAnalysisPrice,
@@ -38,7 +38,7 @@ const drawOptions: DrawOptions = {
   polygon: false,
 };
 
-const ZOOM_LEVEL = 14;
+export const ZOOM_LEVEL = 14;
 
 export default function BasicMap() {
   /** analysis zustand */
@@ -54,29 +54,8 @@ export default function BasicMap() {
     changeBbox(null);
   };
 
-  const fetchAnalysis = async (bboxPayload: unknown) => {
-    try {
-      const res = await fetch('/api/analysis', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bbox: bboxPayload,
-          analysisType,
-          startYear: selectedStartYear ?? new Date().getFullYear() - 1,
-          endYear: selectedEndYear ?? new Date().getFullYear(),
-        }),
-      });
-      if (res.status === 404) return;
-      const data = await res.json();
-      // setAnalysisImage(data.image ?? null);
-    } catch (err) {
-      console.error('Analysis fetch error:', err);
-    }
-  };
-
   const mapRef = useRef<L.Map | null>(null);
   const featureGroupRef = useRef<L.FeatureGroup>(null);
-  const analysisOverlayRef = useRef<L.ImageOverlay | null>(null);
   const _create = useCallback(
     (e: any) => {
       // 여기서 e는 L.DrawEvents.Created 역할입니다.
@@ -103,7 +82,7 @@ export default function BasicMap() {
         };
 
         changeBbox(bboxData);
-        fetchAnalysis(bboxData);
+        // fetchAnalysis(bboxData);
         const area = calculateRaectangleAreaKm2(bboxData);
         changeLandArea(area);
         console.log('BBOX:', bboxData);
@@ -116,11 +95,14 @@ export default function BasicMap() {
         const latlngs = polygon.getLatLngs();
 
         // 단일 폴리곤일 경우 첫 번째 배열이 실제 좌표들입니다.
-        const flatLatLngs = (Array.isArray(latlngs[0]) ? latlngs[0] : latlngs) as L.LatLng[];
+
+        const flatLatLngs = Array.isArray(latlngs[0])
+          ? (latlngs[0] as L.LatLng[])
+          : (latlngs as L.LatLng[]);
 
         // 1. 상태 업데이트 (Zustand)
         // flatLatLngs는 [{lat, lng}, ...] 형태이므로 타입에 맞게 저장됩니다.
-        changeBbox(flatLatLngs as any);
+        changeBbox(flatLatLngs as PolygonBbox);
 
         // 2. 면적 계산 및 로컬 상태 저장
         // 앞에서 만든 함수가 닫기 처리를 내부에서 하므로 flatLatLngs를 그대로 넘깁니다.
@@ -128,12 +110,13 @@ export default function BasicMap() {
         changeLandArea(area);
 
         // 3. 분석 API 호출
-        fetchAnalysis(flatLatLngs);
+        // fetchAnalysis(flatLatLngs);
 
         console.log('Polygon Area (km²):', area);
         console.log('Polygon Coordinates:', flatLatLngs);
       }
     },
+    // [changeBbox, fetchAnalysis]
     [changeBbox]
   );
 
@@ -155,6 +138,14 @@ export default function BasicMap() {
       featureGroup.clearLayers();
     }
   }, [position, changeBbox, changeLandArea]);
+
+  useEffect(() => {
+    if (!bbox) return;
+
+    console.log('re-analyze', analysisType);
+
+    // fetchAnalysis(bbox);
+  }, [analysisType, bbox]);
 
   // useEffect(() => {
   //   if (!analysisImage || !bbox || !mapRef.current) return;
@@ -225,9 +216,10 @@ export default function BasicMap() {
         <MapHeaderPanel />
       </div>
 
+      <div className="absolute right-0 bottom-2.5 z-[1000] w-full bg-amber-600 leading-0">zzzz</div>
       {/* <LayerPanel /> */}
       {/* <AnalysisPanel /> */}
-      {bbox && <BottomBar />}
+      {/* <div className="absolute right-0 bottom-10 left-0">{bbox && <BottomBar />}</div> */}
     </div>
   );
 }
