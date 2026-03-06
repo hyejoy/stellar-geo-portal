@@ -1,5 +1,6 @@
 'use client';
 
+import Header from '@/src/app/components/ui/Header';
 import { useAnalysisActions, useAnalysisType } from '@/src/app/store/analysisStore';
 import type { AnalysisType } from '@/src/app/store/analysisStore';
 import Link from 'next/link';
@@ -63,11 +64,6 @@ export default function HeaderWithScenarios() {
 
   return (
     <header className="border-b border-white/10 bg-[#111827]">
-      <div className="flex items-center justify-between px-4 py-3">
-        <Link href={'/analysis'}>
-          <h1 className="text-lg font-bold text-white">Stellar Geo Portal</h1>
-        </Link>
-      </div>
       <div className="px-4 pb-3">
         <p className="mb-2 text-xs font-medium text-white/50">시나리오 연결</p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
