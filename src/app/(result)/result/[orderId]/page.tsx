@@ -11,7 +11,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 // 스피너 아이콘 추가 (설치 안되어 있다면 npm i lucide-react)
 import { Loader2 } from 'lucide-react';
-import NDVIResult from '@/src/app/components/result/NDVIResult';
+import ResultMapContainer from '@/src/app/components/result/ResultMapContainer';
 
 export default function ResultPage() {
   const bbox = useSelectedBbox();
@@ -61,8 +61,7 @@ export default function ResultPage() {
   return (
     <div className="flex h-full flex-col items-center justify-center">
       {/* 1. 이미지가 있고 로딩 중이 아닐 때 결과 표시 */}
-      {!isLoading && image && analysisType === 'sar' && <SarResult image={image} />}
-      {!isLoading && image && analysisType === 'ndvi' && <NDVIResult image={image} />}
+      {!isLoading && <ResultMapContainer image={image} />}
 
       {/* 2. 로딩 중일 때 표시할 스피너 섹션 */}
       {isLoading && (

@@ -1,58 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import SarLegend from '@/src/app/components/result/SarLegend';
+import SarYearNotice from '@/src/app/components/result/SarYearNotice';
+import Transparency from '@/src/app/components/ui/Transparency';
+import { useSelectedYears } from '@/src/app/store/analysisStore';
 
 interface Props {
   opacity: number;
-  onChangeOpacity: (number) => void;
+  onChangeOpacity: (value: number) => void;
 }
+
 export default function SarControlPanel({ opacity, onChangeOpacity }: Props) {
+  const { selectedEndYear: endYear } = useSelectedYears();
   return (
-    <div className="bg-panel flex w-full overflow-hidden border border-gray-700 shadow-lg">
-      {/* Radar Intensity */}
-      <div className="flex w-1/2 flex-col gap-3 border-r border-gray-700 p-4">
-        <h3 className="text-sm font-semibold text-gray-300">Radar Intensity</h3>
-
-        {/* Gradient Bar */}
-        <div className="relative h-6 w-full rounded-md bg-gradient-to-r from-black via-gray-700 to-white" />
-
-        {/* Labels */}
-        <div className="flex justify-between text-xs text-gray-400">
-          <span>Low</span>
-          <span>High</span>
-        </div>
-
-        <div className="flex justify-between text-xs text-gray-500">
-          <span>More Opaque</span>
-          <span>Less Opaque</span>
-        </div>
+    <div className="bg-panel flex w-full flex-col overflow-hidden shadow-lg">
+      {/* SAR Transparency */}
+      <div className="flex w-full flex-col gap-4 p-4">
+        <Transparency
+          title="SAR Transparency"
+          opacity={opacity}
+          onChangeOpacity={onChangeOpacity}
+        />
       </div>
 
-      {/* SAR Transparency */}
-      <div className="flex w-1/2 flex-col gap-4 p-4">
-        <h3 className="text-sm font-semibold text-gray-300">SAR Transparency</h3>
+      <hr className="border-gray-600" />
 
-        {/* Slider */}
-        <div className="flex w-full items-center gap-3">
-          <input
-            className="w-full"
-            type="range"
-            min={0}
-            max={100}
-            value={opacity * 100}
-            onChange={(e) => onChangeOpacity(Number(e.target.value) / 100)}
-          />
+      {/* 기준 연도 안내 배너 */}
+      <SarYearNotice endYear={endYear} />
 
-          <span className="w-10 text-sm font-semibold text-gray-300">
-            {Math.round(opacity * 100)}%
-          </span>
-        </div>
+      <hr className="border-gray-600" />
 
-        {/* Labels */}
-        <div className="flex justify-between text-xs text-gray-500">
-          <span>More Opaque</span>
-          <span>Less Opaque</span>
-        </div>
+      {/* Radar Intensity Legend */}
+      <div className="flex w-full flex-col gap-3 p-4">
+        {/* 범례 항목 */}
+        <SarLegend />
       </div>
     </div>
   );
