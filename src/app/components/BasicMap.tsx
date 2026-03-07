@@ -3,7 +3,6 @@ import BottomBar from '@/src/app/components/BottomBar';
 import CustomDrawToolbar from '@/src/app/components/CustomDrawToolbar';
 import MapController from '@/src/app/components/MapController';
 import MapHeaderPanel from '@/src/app/components/MapHeaderPanel';
-import TopLayer from '@/src/app/components/TopLayer';
 import osm from '@/src/app/leaftlet/osmProvider';
 import {
   useAnalysisActions,
@@ -206,7 +205,6 @@ export default function BasicMap() {
             }}
           />
 
-          <TopLayer />
           <CustomDrawToolbar onChangeBbox={handleRefreshBbox} featureGroupRef={featureGroupRef} />
         </FeatureGroup>
       </MapContainer>

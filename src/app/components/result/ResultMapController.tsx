@@ -6,9 +6,6 @@ import L from 'leaflet';
 import { useSelectedBbox } from '@/src/app/store/analysisStore';
 import { Bbox, PolygonBbox } from '@/src/types/leafletDraw';
 
-function isPolygon(bbox: Bbox): bbox is PolygonBbox {
-  return Array.isArray(bbox);
-}
 export default function ResultMapController() {
   const map = useMap();
   const bbox = useSelectedBbox();
@@ -25,7 +22,7 @@ export default function ResultMapController() {
       bounds = L.latLngBounds([bbox.south, bbox.west], [bbox.north, bbox.east]);
     }
 
-    map.fitBounds(bounds);
+    map.fitBounds(bounds, { maxZoom: 14 });
 
     hasMoved.current = true;
   }, [bbox, map]);

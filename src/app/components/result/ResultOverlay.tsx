@@ -20,7 +20,7 @@ export default function ResultOverlay({ image, bbox, opacity }) {
       url={`data:image/png;base64,${image}`}
       bounds={bounds}
       opacity={opacity}
-      className="z-[100000]"
+      className="z-10000"
     />
   );
 }
