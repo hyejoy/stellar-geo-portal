@@ -44,7 +44,7 @@ export const useAnalysisStore = create(
     position: AREAS['pyeongtaek'].center,
     landArea: 0,
     price: '',
-    selectedStartYear: currentYear - 4,
+    selectedStartYear: currentYear - 2,
     selectedEndYear: currentYear,
     analysisType: 'sar',
     satellite: 'sentinel-1-grd',

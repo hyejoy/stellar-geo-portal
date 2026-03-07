@@ -9,17 +9,17 @@ export const AREAS: Record<
     lastUpdateDate: Date;
   }
 > = {
-  pyeongtaek: {
-    name: '평택 산업단지',
-    description: '평택 산업단지 분석',
-    center: [37.034727800726856, 127.06008195877075],
-    lastUpdateDate: new Date('2026-12-17T03:24:00'),
-  },
   ulsan: {
     name: '울산 산업단지',
     description: '울산 산업단지 분석',
     center: [35.5055, 129.3836],
     lastUpdateDate: new Date('2024-12-17T03:24:00'),
+  },
+  pyeongtaek: {
+    name: '평택 산업단지',
+    description: '평택 산업단지 분석',
+    center: [37.034727800726856, 127.06008195877075],
+    lastUpdateDate: new Date('2026-12-17T03:24:00'),
   },
   yeosu: {
     name: '여수 산업단지',
@@ -61,8 +61,8 @@ export const AREAS: Record<
 };
 
 export const AREA_ARRAY: AreaKey[] = [
-  'pyeongtaek',
   'ulsan',
+  'pyeongtaek',
   'yeosu',
   'gumi',
   'changwon',
