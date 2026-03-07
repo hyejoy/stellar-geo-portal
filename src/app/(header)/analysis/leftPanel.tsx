@@ -40,7 +40,7 @@ export default function LeftPanel() {
           onChange={handleAread}
         />
 
-        <div className="no-scrollbar flex h-[650px] flex-col overflow-scroll rounded-2xl bg-gray-600">
+        <div className="no-scrollbar bg-panel flex h-[650px] flex-col overflow-scroll rounded-2xl">
           {AREA_ARRAY.map((item) => (
             <ListCard
               keyName={item}

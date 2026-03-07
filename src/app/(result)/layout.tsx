@@ -8,9 +8,11 @@ export default function ResultLayout({ children }: { children: React.ReactNode }
           <ROIPanel />
         </div>
 
-        <div className="flex flex-1 flex-col">
+        {/* <div className="flex flex-1 flex-col">
           <div className="bg-panel relative h-full w-full">{children}</div>
-        </div>
+        </div> */}
+
+        <div className="flex flex-1 flex-col">{children}</div>
       </div>
     </main>
   );
