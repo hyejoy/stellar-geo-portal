@@ -39,9 +39,9 @@ interface AnalysisState {
 export const useAnalysisStore = create(
   subscribeWithSelector<AnalysisState>((set) => ({
     analysisOrder: null,
-    selectedArea: 'pyeongtaek',
+    selectedArea: 'ulsan',
     selectedBbox: null,
-    position: AREAS['pyeongtaek'].center,
+    position: AREAS['ulsan'].center,
     landArea: 0,
     price: '',
     selectedStartYear: currentYear - 2,
@@ -78,19 +78,10 @@ export const useAnalysisStore = create(
 useAnalysisStore.subscribe(
   (store) => store.selectedArea,
   (newArea, prevArea) => {
-    console.log(',.', newArea);
-    console.log(prevArea);
     if (newArea === prevArea) return;
     useAnalysisStore.setState({
       position: AREAS[newArea].center,
     });
-  }
-);
-useAnalysisStore.subscribe(
-  (store) => store.position,
-  (newP, prev) => {
-    console.log(newP);
-    console.log(prev);
   }
 );
 
