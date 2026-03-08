@@ -1,21 +1,20 @@
 'use client';
 
-import { useMap } from 'react-leaflet';
+import { useAnalysisActions, useSelectedBbox } from '@/src/app/store/analysisStore';
+import clsx from 'clsx';
 import L from 'leaflet';
 import 'leaflet-draw';
-import { useState } from 'react';
-import clsx from 'clsx';
-import { useAnalysisActions, useSelectedBbox } from '@/src/app/store/analysisStore';
+import { useEffect, useState } from 'react';
+import { useMap } from 'react-leaflet';
 
 interface Props {
   featureGroupRef: React.RefObject<L.FeatureGroup>;
-  onChangeBbox: () => void;
 }
 type DrawMode = 'rectangle' | 'polygon' | null;
 
-export default function CustomDrawToolbar({ featureGroupRef, onChangeBbox }: Props) {
+export default function CustomDrawToolbar({ featureGroupRef }: Props) {
   const [mode, setMode] = useState<DrawMode>(null);
-  const { resetLandAreaAndPrice } = useAnalysisActions();
+  const { resetLandAreaAndPrice, changeBbox } = useAnalysisActions();
   const bbox = useSelectedBbox();
   const map = useMap();
 
@@ -36,27 +35,26 @@ export default function CustomDrawToolbar({ featureGroupRef, onChangeBbox }: Pro
   const clearLayers = () => {
     setMode(null);
     resetLandAreaAndPrice();
-    onChangeBbox();
+    changeBbox(null);
     featureGroupRef.current?.clearLayers();
   };
+
+  useEffect(() => {
+    // 영역 변경시 bbox 선택영역 없을때만  툴바 선택 초기화
+    if (!bbox) {
+      setMode(null);
+    }
+  }, [bbox]);
 
   return (
     <div className="absolute top-25 left-1/2 z-[1000] flex -translate-x-1/2 items-center gap-1 rounded-xl border border-white/[0.08] bg-[#0d1117]/90 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-md">
       {/* Rectangle */}
-      <ToolButton
-        onClick={enableRectangle}
-        isActive={mode === 'rectangle' && !!bbox}
-        title="사각형 선택"
-      >
+      <ToolButton onClick={enableRectangle} isActive={mode === 'rectangle'} title="사각형 선택">
         <RectIcon />
       </ToolButton>
 
       {/* Polygon */}
-      <ToolButton
-        onClick={enablePolygon}
-        isActive={mode === 'polygon' && !!bbox}
-        title="다각형 선택"
-      >
+      <ToolButton onClick={enablePolygon} isActive={mode === 'polygon'} title="다각형 선택">
         <PolyIcon />
       </ToolButton>
 

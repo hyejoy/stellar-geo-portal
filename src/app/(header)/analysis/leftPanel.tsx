@@ -1,30 +1,20 @@
 'use client';
-import {
-  useSelectedArea,
-  useSelectedBbox,
-  useAnalysisActions,
-} from '@/src/app/store/analysisStore';
+import SelectBox from '@/src/app/components/ui/SelectBox';
+import { useAnalysisActions, useSelectedArea } from '@/src/app/store/analysisStore';
 import { AREA_ARRAY, AREAS } from '@/src/constants/areas';
 import { AreaKey } from '@/src/types/area';
-import { ChangeEvent, useMemo } from 'react';
+import { ChangeEvent } from 'react';
 import ListCard from '../../components/ListCard';
-import SelectBox from '@/src/app/components/ui/SelectBox';
 
 export default function LeftPanel() {
   /** zustand */
   const area = useSelectedArea();
-  const bbox = useSelectedBbox();
   const { changeArea } = useAnalysisActions();
-
-  const selected = useMemo(() => AREAS[area], [area]);
 
   const handleAread = (e: ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
     changeArea(e.target.value as AreaKey);
   };
-  const areaOptions = Object.entries(AREAS).map(([key, v]) => ({
-    value: key,
-    label: v.name,
-  }));
+
   return (
     <>
       <div className="w-107.5 space-y-4 border-r p-4">

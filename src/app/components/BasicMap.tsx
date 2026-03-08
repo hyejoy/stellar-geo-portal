@@ -1,17 +1,13 @@
 'use client';
-import BottomBar from '@/src/app/components/BottomBar';
 import CustomDrawToolbar from '@/src/app/components/CustomDrawToolbar';
 import MapController from '@/src/app/components/MapController';
 import MapHeaderPanel from '@/src/app/components/MapHeaderPanel';
 import osm from '@/src/app/leaftlet/osmProvider';
 import {
   useAnalysisActions,
-  useAnalysisType,
-  useAreaPrice,
   useLandArea,
   useSelectedBbox,
   useSelectedPosition,
-  useSelectedYears,
 } from '@/src/app/store/analysisStore';
 import { DrawOptions, PolygonBbox } from '@/src/types/leafletDraw';
 import { formatCurrency } from '@/src/utils/format';
@@ -24,7 +20,7 @@ import L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { FeatureGroup, MapContainer, TileLayer } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
 
@@ -44,14 +40,7 @@ export default function BasicMap() {
   const position = useSelectedPosition();
   const bbox = useSelectedBbox();
   const landArea = useLandArea();
-  const analysisType = useAnalysisType();
-  const { selectedStartYear, selectedEndYear } = useSelectedYears();
   const { changeBbox, changeLandArea, changeAreaPrice } = useAnalysisActions();
-
-  // const [analysisImage, setAnalysisImage] = useState<string | null>(null);
-  const handleRefreshBbox = () => {
-    changeBbox(null);
-  };
 
   const mapRef = useRef<L.Map | null>(null);
   const featureGroupRef = useRef<L.FeatureGroup>(null);
@@ -84,7 +73,6 @@ export default function BasicMap() {
         // fetchAnalysis(bboxData);
         const area = calculateRaectangleAreaKm2(bboxData);
         changeLandArea(area);
-        console.log('BBOX:', bboxData);
       }
 
       // 3. 폴리곤(Polygon) 처리
@@ -107,16 +95,9 @@ export default function BasicMap() {
         // 앞에서 만든 함수가 닫기 처리를 내부에서 하므로 flatLatLngs를 그대로 넘깁니다.
         const area = calculatePolygonAreaKm2(flatLatLngs);
         changeLandArea(area);
-
-        // 3. 분석 API 호출
-        // fetchAnalysis(flatLatLngs);
-
-        console.log('Polygon Area (km²):', area);
-        console.log('Polygon Coordinates:', flatLatLngs);
       }
     },
-    // [changeBbox, fetchAnalysis]
-    [changeBbox]
+    [changeBbox, bbox]
   );
 
   useEffect(() => {
@@ -136,40 +117,8 @@ export default function BasicMap() {
     if (featureGroup) {
       featureGroup.clearLayers();
     }
-  }, [position, changeBbox, changeLandArea]);
-
-  useEffect(() => {
-    if (!bbox) return;
-
-    console.log('re-analyze', analysisType);
-
-    // fetchAnalysis(bbox);
-  }, [analysisType, bbox]);
-
-  // useEffect(() => {
-  //   if (!analysisImage || !bbox || !mapRef.current) return;
-  //   if (Array.isArray(bbox)) return;
-
-  //   const map = mapRef.current;
-  //   const bounds: L.LatLngBoundsLiteral = [
-  //     [bbox.south, bbox.west],
-  //     [bbox.north, bbox.east],
-  //   ];
-
-  //   if (analysisOverlayRef.current) {
-  //     map.removeLayer(analysisOverlayRef.current);
-  //     analysisOverlayRef.current = null;
-  //   }
-  //   const overlay = L.imageOverlay(`data:image/png;base64,${analysisImage}`, bounds).addTo(map);
-  //   analysisOverlayRef.current = overlay;
-
-  //   return () => {
-  //     if (analysisOverlayRef.current && map.hasLayer(analysisOverlayRef.current)) {
-  //       map.removeLayer(analysisOverlayRef.current);
-  //       analysisOverlayRef.current = null;
-  //     }
-  //   };
-  // }, [analysisImage, bbox]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [position]);
 
   return (
     <div className="relative h-full w-full">
@@ -205,7 +154,7 @@ export default function BasicMap() {
             }}
           />
 
-          <CustomDrawToolbar onChangeBbox={handleRefreshBbox} featureGroupRef={featureGroupRef} />
+          <CustomDrawToolbar featureGroupRef={featureGroupRef} />
         </FeatureGroup>
       </MapContainer>
 

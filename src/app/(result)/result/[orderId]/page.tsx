@@ -1,7 +1,5 @@
 'use client';
 
-import SarResult from '@/src/app/components/result/SarResult';
-import type { AnalysisType } from '@/src/app/store/analysisStore';
 import {
   useAnalysisActions,
   useAnalysisType,
@@ -10,8 +8,8 @@ import {
 } from '@/src/app/store/analysisStore';
 import { useCallback, useEffect, useState } from 'react';
 // 스피너 아이콘 추가 (설치 안되어 있다면 npm i lucide-react)
-import { Loader2 } from 'lucide-react';
 import ResultMapContainer from '@/src/app/components/result/ResultMapContainer';
+import { Loader2 } from 'lucide-react';
 
 export default function ResultPage() {
   const bbox = useSelectedBbox();
