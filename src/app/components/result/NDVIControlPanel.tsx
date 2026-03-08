@@ -5,7 +5,6 @@ import NDVILegend from '@/src/app/components/result/NDVILengend';
 import NDVITrendChart from '@/src/app/components/result/NDVITrendChart';
 import Transparency from '@/src/app/components/ui/Transparency';
 import { useSelectedYears } from '@/src/app/store/analysisStore';
-import { useState } from 'react';
 
 interface Props {
   opacity: number;
@@ -15,10 +14,10 @@ interface Props {
 export default function NDVIControlPanel({ opacity, onChangeOpacity }: Props) {
   const { selectedStartYear: startYear, selectedEndYear: endYear } = useSelectedYears();
   return (
-    <div className="bg-panel flex w-full flex-col overflow-hidden shadow-lg">
+    <div className="bg-panel flex w-full flex-col">
       {/* SAR Transparency */}
 
-      <div className="flex w-full flex-col gap-4 p-4">
+      <div className="flex w-full flex-col gap-3 p-4">
         <Transparency
           title="NDVI Transparency"
           opacity={opacity}
@@ -35,7 +34,7 @@ export default function NDVIControlPanel({ opacity, onChangeOpacity }: Props) {
       <hr className="border-gray-600" />
 
       {/* trend chart */}
-      <div className="flex h-[350px] w-full flex-col gap-4 p-4">
+      <div className="flex h-[200px] w-full flex-col gap-4 p-4">
         <h3 className="text-sm font-semibold text-gray-300"> NDVI Trend Chart </h3>
         <NDVITrendChart />
       </div>
@@ -58,7 +57,7 @@ function ShortRangeWarning({ startYear, endYear }: { startYear: number; endYear:
   if (range >= 3) return null;
 
   return (
-    <div className="relative mx-4 mb-2 overflow-hidden rounded-lg border border-orange-500/20 bg-orange-500/5 px-4 py-3">
+    <div className="relative mx-4 mb-4 rounded-lg border border-orange-500/20 bg-orange-500/5 px-4 py-3">
       {/* 왼쪽 강조 바 */}
       <div className="absolute top-0 left-0 h-full w-[3px] rounded-l-lg bg-gradient-to-b from-orange-400 to-orange-600" />
 

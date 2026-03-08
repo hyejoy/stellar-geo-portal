@@ -1,20 +1,11 @@
 'use clinet';
 import { useNDVITrendChart } from '@/src/app/store/analysisStore';
+import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 
-// const data = [
-//   { year: 2018, ndvi: 0.05 },
-//   { year: 2019, ndvi: 0.12 },
-//   { year: 2020, ndvi: 0.18 },
-//   { year: 2021, ndvi: 0.25 },
-//   { year: 2022, ndvi: 0.35 },
-//   { year: 2023, ndvi: 0.42 },
-//   { year: 2024, ndvi: 0.6 },
-// ];
-
-export default function NDVITrendChart() {
+// TODO : ndvitrend chart 바뀔때만 랜더링되는지 확인하기
+export default React.memo(function NDVITrendChart() {
   const data = useNDVITrendChart();
-  console.log('>>>', data);
   return (
     <div className="h-full w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -27,4 +18,4 @@ export default function NDVITrendChart() {
       </ResponsiveContainer>
     </div>
   );
-}
+});

@@ -13,7 +13,7 @@ interface Props {
 export default function SarControlPanel({ opacity, onChangeOpacity }: Props) {
   const { selectedEndYear: endYear } = useSelectedYears();
   return (
-    <div className="bg-panel flex w-full flex-col overflow-hidden shadow-lg">
+    <div className="bg-panel flex w-full flex-col gap-4 overflow-hidden">
       {/* SAR Transparency */}
       <div className="flex w-full flex-col gap-4 p-4">
         <Transparency

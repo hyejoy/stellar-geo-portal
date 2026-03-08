@@ -49,8 +49,8 @@ export default function ResultMapContainer({ image }) {
         </MapContainer>
       </div>
 
-      <div className="bg-panel w-[380px]">
-        <div className="bg-panel flex w-full flex-col overflow-hidden shadow-lg">
+      <div className="bg-panel scrollbar-thin w-[380px] overflow-y-auto">
+        <div className="bg-panel flex w-full flex-col">
           {/* SAR Transparency */}
           <div className="flex w-full flex-col gap-4 p-4">
             <h3 className="text-sm font-semibold text-gray-300">
