@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Geo Stellar Portal
 
-## Getting Started
+위성 데이터를 활용해 관심 지역의 변화를 분석할 수 있는  
+**지리공간 데이터 분석 플랫폼 프로토타입**입니다.
 
-First, run the development server:
+지도에서 관심 영역(ROI)을 선택하고,  
+해당 영역에 대해 **NDVI 시계열 변화** 및 **SAR 기반 분석 결과**를 확인하는 흐름을 중심으로
+설계했습니다.
+
+---
+
+## 프로젝트 소개
+
+Geo Stellar Portal은 위성 영상 기반 데이터를  
+사용자가 보다 직관적으로 탐색하고 해석할 수 있도록 돕는 서비스입니다.
+
+단순히 지도를 보여주는 데 그치지 않고,  
+사용자가 직접 분석 영역을 설정하고 결과를 확인하는  
+**지도 중심 분석 UX**를 목표로 개발했습니다.
+
+이 프로젝트는 실제 지리공간 SaaS 서비스의 흐름을 가정하여, 다음과 같은 문제를 해결하는 방향으로
+설계되었습니다.
+
+- 복잡한 공간 데이터를 사용자 친화적으로 보여주기
+- 관심 영역 기반 분석 플로우 구성하기
+- 지도와 분석 결과 패널이 유기적으로 연결되는 인터페이스 만들기
+- 향후 실제 위성 데이터 API와 연결 가능한 구조 만들기
+
+---
+
+## 주요 기능
+
+### 1. 지도 기반 관심 영역(ROI) 설정
+
+- 사용자가 지도에서 분석할 영역을 직접 선택할 수 있음
+- 선택된 영역을 기준으로 분석 요청이 가능하도록 구조 설계
+
+### 2. NDVI 시계열 변화 분석
+
+- 특정 지역의 식생 변화를 연도별/기간별로 확인할 수 있는 차트 영역 구성
+- 분석 결과를 시각적으로 비교할 수 있도록 UI 설계
+
+### 3. SAR 분석 결과 시각화
+
+- SAR 위성 데이터를 활용한 결과 표시 구조 반영
+- 날씨나 시간대 제약이 적은 위성 데이터 활용 가능성을 고려한 UX 설계
+
+### 4. 분석 결과 패널 및 오버레이 구조
+
+- 지도와 결과 패널을 동시에 활용할 수 있도록 레이아웃 구성
+- 추후 결과 레이어 확장 및 상호작용을 고려해 설계
+
+---
+
+## 기술 스택
+
+### Frontend
+
+- Next.js
+- React
+- TypeScript
+
+### Map / Visualization
+
+- Leaflet
+- Recharts
+
+### State Management
+
+- Zustand
+
+### Styling
+
+- Tailwind CSS
+
+### Data / API
+
+- Satellite Data API 연동 구조
+- NDVI / SAR 분석 요청 흐름 설계
+
+---
+
+## 폴더 구조 예시
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+src/
+ ┣ app/
+ ┃ ┣ (analysis)/
+ ┃ ┣ (result)/
+ ┃ ┣ components/
+ ┃ ┣ api/
+ ┃ ┗ store/
+ ┣ types/
+ ┗ utils/
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
