@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
+export const maxDuration = 60;
 const BASE_URL = process.env.SENTINEL_BASE_URL!;
 const CLIENT_ID = process.env.SENTINEL_CLIENT_ID!;
 const CLIENT_SECRET = process.env.SENTINEL_CLIENT_SECRET!;
@@ -147,6 +147,7 @@ async function getAccessToken() {
   });
 
   const data = await res.json();
+  console.log('🔑 auth response:', JSON.stringify(data));
   return data.access_token;
 }
 
