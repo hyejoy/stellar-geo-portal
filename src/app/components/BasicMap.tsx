@@ -162,11 +162,6 @@ export default function BasicMap() {
       <div className="absolute top-0 right-0 left-0 z-[1000]">
         <MapHeaderPanel />
       </div>
-
-      <div className="absolute right-0 bottom-2.5 z-[1000] w-full bg-amber-600 leading-0">zzzz</div>
-      {/* <LayerPanel /> */}
-      {/* <AnalysisPanel /> */}
-      {/* <div className="absolute right-0 bottom-10 left-0">{bbox && <BottomBar />}</div> */}
     </div>
   );
 }
